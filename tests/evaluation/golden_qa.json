@@ -1,0 +1,144 @@
+[
+  {
+    "id": "hf_001",
+    "disease": "Heart Failure",
+    "question": "What are the typical symptoms of heart failure?",
+    "expected_keywords": ["dyspnea", "shortness of breath", "edema", "fatigue", "orthopnea"],
+    "expected_disease": "Heart Failure"
+  },
+  {
+    "id": "hf_002",
+    "disease": "Heart Failure",
+    "question": "What lab findings are used to diagnose heart failure?",
+    "expected_keywords": ["BNP", "NT-proBNP", "echocardiography", "LVEF"],
+    "expected_disease": "Heart Failure"
+  },
+  {
+    "id": "hf_003",
+    "disease": "Heart Failure",
+    "question": "What is HFpEF and how is it different from HFrEF?",
+    "expected_keywords": ["ejection fraction", "preserved", "reduced", "LVEF"],
+    "expected_disease": "Heart Failure"
+  },
+  {
+    "id": "copd_001",
+    "disease": "COPD",
+    "question": "What are the common symptoms of COPD exacerbation?",
+    "expected_keywords": ["dyspnea", "cough", "sputum", "shortness of breath", "wheezing"],
+    "expected_disease": "COPD"
+  },
+  {
+    "id": "copd_002",
+    "disease": "COPD",
+    "question": "What are the risk factors for COPD?",
+    "expected_keywords": ["smoking", "tobacco", "exposure", "respiratory"],
+    "expected_disease": "COPD"
+  },
+  {
+    "id": "copd_003",
+    "disease": "COPD",
+    "question": "What signs are observed during physical examination of a COPD patient?",
+    "expected_keywords": ["breath sounds", "wheezing", "oxygen", "respiratory rate"],
+    "expected_disease": "COPD"
+  },
+  {
+    "id": "acs_001",
+    "disease": "Acute Coronary Syndrome",
+    "question": "What are the symptoms of acute coronary syndrome?",
+    "expected_keywords": ["chest pain", "shortness of breath", "diaphoresis", "pressure"],
+    "expected_disease": "Acute Coronary Syndrome"
+  },
+  {
+    "id": "acs_002",
+    "disease": "Acute Coronary Syndrome",
+    "question": "What is the difference between NSTEMI and STEMI?",
+    "expected_keywords": ["troponin", "ST elevation", "ECG", "myocardial"],
+    "expected_disease": "Acute Coronary Syndrome"
+  },
+  {
+    "id": "acs_003",
+    "disease": "Acute Coronary Syndrome",
+    "question": "What lab tests are ordered for a patient with suspected ACS?",
+    "expected_keywords": ["troponin", "EKG", "ECG", "cardiac enzymes"],
+    "expected_disease": "Acute Coronary Syndrome"
+  },
+  {
+    "id": "stroke_001",
+    "disease": "Stroke",
+    "question": "What are the signs and symptoms of an ischemic stroke?",
+    "expected_keywords": ["weakness", "facial droop", "speech", "vision", "numbness"],
+    "expected_disease": "Stroke"
+  },
+  {
+    "id": "stroke_002",
+    "disease": "Stroke",
+    "question": "What imaging is used to diagnose stroke?",
+    "expected_keywords": ["CT", "MRI", "brain", "hemorrhage", "infarct"],
+    "expected_disease": "Stroke"
+  },
+  {
+    "id": "htn_001",
+    "disease": "Hypertension",
+    "question": "What are the risk factors for hypertension?",
+    "expected_keywords": ["obesity", "diabetes", "sodium", "family history", "age"],
+    "expected_disease": "Hypertension"
+  },
+  {
+    "id": "htn_002",
+    "disease": "Hypertension",
+    "question": "What are the symptoms associated with hypertension?",
+    "expected_keywords": ["headache", "blood pressure", "dizziness", "elevated"],
+    "expected_disease": "Hypertension"
+  },
+  {
+    "id": "gerd_001",
+    "disease": "Gastro-oesophageal Reflux Disease",
+    "question": "What are the common symptoms of GERD?",
+    "expected_keywords": ["heartburn", "regurgitation", "chest", "reflux", "acid"],
+    "expected_disease": "Gastro-oesophageal Reflux Disease"
+  },
+  {
+    "id": "gerd_002",
+    "disease": "Gastro-oesophageal Reflux Disease",
+    "question": "What dietary factors contribute to acid reflux?",
+    "expected_keywords": ["fatty", "spicy", "alcohol", "caffeine", "food"],
+    "expected_disease": "Gastro-oesophageal Reflux Disease"
+  },
+  {
+    "id": "tb_001",
+    "disease": "Tuberculosis",
+    "question": "What are the clinical symptoms of tuberculosis?",
+    "expected_keywords": ["cough", "fever", "night sweats", "weight loss", "hemoptysis"],
+    "expected_disease": "Tuberculosis"
+  },
+  {
+    "id": "alzheimer_001",
+    "disease": "Alzheimer",
+    "question": "What are the early signs of Alzheimer's disease?",
+    "expected_keywords": ["memory", "confusion", "cognitive", "dementia", "forgetfulness"],
+    "expected_disease": "Alzheimer"
+  },
+  {
+    "id": "ugib_001",
+    "disease": "Upper Gastrointestinal Bleeding",
+    "question": "What are the symptoms of upper gastrointestinal bleeding?",
+    "expected_keywords": ["hematemesis", "melena", "blood", "vomiting", "stool"],
+    "expected_disease": "Upper Gastrointestinal Bleeding"
+  },
+  {
+    "id": "ood_001",
+    "disease": "out_of_scope",
+    "question": "What is the treatment for malaria?",
+    "expected_keywords": [],
+    "expected_disease": null,
+    "expect_refusal": true
+  },
+  {
+    "id": "ood_002",
+    "disease": "out_of_scope",
+    "question": "What is the capital of France?",
+    "expected_keywords": [],
+    "expected_disease": null,
+    "expect_refusal": true
+  }
+]

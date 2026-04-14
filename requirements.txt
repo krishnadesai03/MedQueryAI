@@ -1,0 +1,39 @@
+# Core RAG framework
+langchain==0.3.25
+langchain-community==0.3.23
+langchain-openai==0.3.16
+
+# Document loading & parsing
+pypdf==5.4.0
+pymupdf==1.25.5
+
+# Embeddings
+sentence-transformers==4.1.0
+
+# Vector store
+chromadb==0.6.3
+
+# BM25 lexical search
+rank-bm25==0.2.2
+
+# LLM APIs
+openai==1.77.0
+anthropic>=0.40.0
+
+# Reranking
+# (cross-encoder models loaded via sentence-transformers)
+
+# Evaluation
+ragas==0.2.14
+
+# API layer
+fastapi==0.115.12
+uvicorn==0.34.2
+
+# Testing
+pytest==8.3.5
+
+# Utilities
+python-dotenv==1.1.0
+tiktoken==0.9.0
+tqdm==4.67.1

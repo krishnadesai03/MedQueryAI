@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Healthcare RAG Assistant</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #1a365d;
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      flex-shrink: 0;
+    }
+    header svg { flex-shrink: 0; }
+    header h1 { font-size: 1.15rem; font-weight: 600; letter-spacing: 0.01em; }
+    header p  { font-size: 0.78rem; color: #90cdf4; margin-top: 2px; }
+
+    /* ── Chat area ── */
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .bubble-wrap {
+      display: flex;
+      flex-direction: column;
+      max-width: 780px;
+      width: 100%;
+    }
+    .bubble-wrap.user  { align-self: flex-end; align-items: flex-end; }
+    .bubble-wrap.bot   { align-self: flex-start; align-items: flex-start; }
+
+    .bubble {
+      padding: 12px 16px;
+      border-radius: 16px;
+      line-height: 1.6;
+      font-size: 0.92rem;
+      max-width: 100%;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .bubble-wrap.user .bubble {
+      background: #2b6cb0;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .bubble-wrap.bot .bubble {
+      background: #fff;
+      color: #2d3748;
+      border: 1px solid #e2e8f0;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    .bubble-wrap.bot .bubble.refused {
+      border-left: 4px solid #e53e3e;
+      background: #fff5f5;
+    }
+
+    /* ── Sources panel ── */
+    .sources {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: #4a5568;
+    }
+    .sources summary {
+      cursor: pointer;
+      color: #2b6cb0;
+      font-weight: 500;
+      user-select: none;
+    }
+    .sources summary:hover { text-decoration: underline; }
+    .sources ul {
+      margin-top: 6px;
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sources li { list-style: disc; }
+    .source-tag {
+      display: inline-block;
+      background: #ebf8ff;
+      color: #2c5282;
+      border: 1px solid #bee3f8;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 0.72rem;
+      margin-right: 4px;
+    }
+
+    /* ── Thinking indicator ── */
+    .thinking {
+      display: flex;
+      gap: 5px;
+      padding: 12px 16px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      width: fit-content;
+    }
+    .thinking span {
+      width: 8px; height: 8px;
+      background: #a0aec0;
+      border-radius: 50%;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+    .thinking span:nth-child(2) { animation-delay: 0.2s; }
+    .thinking span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40%           { transform: translateY(-6px); }
+    }
+
+    /* ── Disclaimer ── */
+    .disclaimer {
+      font-size: 0.72rem;
+      color: #718096;
+      background: #fffbeb;
+      border: 1px solid #f6e05e;
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin-top: 6px;
+      max-width: 780px;
+    }
+
+    /* ── Input bar ── */
+    #input-bar {
+      background: #fff;
+      border-top: 1px solid #e2e8f0;
+      padding: 14px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+    #question {
+      flex: 1;
+      resize: none;
+      border: 1px solid #cbd5e0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      min-height: 44px;
+      max-height: 140px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    #question:focus { border-color: #2b6cb0; }
+
+    #send-btn {
+      background: #2b6cb0;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      height: 44px;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    #send-btn:hover:not(:disabled) { background: #2c5282; }
+    #send-btn:disabled { background: #a0aec0; cursor: not-allowed; }
+
+    /* ── Welcome message ── */
+    #welcome {
+      text-align: center;
+      color: #718096;
+      margin: auto;
+      padding: 40px 20px;
+    }
+    #welcome h2 { font-size: 1.1rem; color: #4a5568; margin-bottom: 8px; }
+    #welcome p  { font-size: 0.85rem; max-width: 480px; margin: 0 auto; }
+    .example-queries {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .example-queries button {
+      background: #fff;
+      border: 1px solid #cbd5e0;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: #2b6cb0;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .example-queries button:hover { background: #ebf8ff; }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <rect width="32" height="32" rx="8" fill="#2b6cb0"/>
+    <path d="M16 7v18M7 16h18" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  </svg>
+  <div>
+    <h1>Healthcare RAG Assistant</h1>
+    <p>Answers grounded in MIMIC-IV clinical data &amp; diagnostic knowledge graphs</p>
+  </div>
+</header>
+
+<div id="chat">
+  <div id="welcome">
+    <h2>Ask a clinical question</h2>
+    <p>Every answer is grounded in real de-identified clinical notes and diagnostic knowledge graphs. Sources are always cited.</p>
+    <div class="example-queries">
+      <button onclick="fillQuestion(this)">What symptoms are associated with COPD exacerbation?</button>
+      <button onclick="fillQuestion(this)">How is heart failure with preserved ejection fraction diagnosed?</button>
+      <button onclick="fillQuestion(this)">What are the risk factors for acute coronary syndrome?</button>
+      <button onclick="fillQuestion(this)">What lab findings suggest pneumonia?</button>
+    </div>
+  </div>
+</div>
+
+<div id="input-bar">
+  <textarea id="question" placeholder="Type your clinical question here..." rows="1"></textarea>
+  <button id="send-btn" onclick="sendQuestion()">Ask</button>
+</div>
+
+<script>
+  const chat     = document.getElementById('chat');
+  const textarea = document.getElementById('question');
+  const sendBtn  = document.getElementById('send-btn');
+
+  // Auto-resize textarea
+  textarea.addEventListener('input', () => {
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 140) + 'px';
+  });
+
+  // Submit on Enter (Shift+Enter for newline)
+  textarea.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendQuestion();
+    }
+  });
+
+  function fillQuestion(btn) {
+    textarea.value = btn.textContent;
+    textarea.dispatchEvent(new Event('input'));
+    textarea.focus();
+  }
+
+  function removeWelcome() {
+    const w = document.getElementById('welcome');
+    if (w) w.remove();
+  }
+
+  function appendBubble(role, content, sources, refused) {
+    const wrap = document.createElement('div');
+    wrap.className = `bubble-wrap ${role}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble' + (refused ? ' refused' : '');
+    bubble.textContent = content;
+    wrap.appendChild(bubble);
+
+    if (role === 'bot' && sources && sources.length > 0) {
+      const details = document.createElement('details');
+      details.className = 'sources';
+      const summary = document.createElement('summary');
+      summary.textContent = `${sources.length} source${sources.length > 1 ? 's' : ''} cited`;
+      details.appendChild(summary);
+
+      const ul = document.createElement('ul');
+      sources.forEach(s => {
+        const li = document.createElement('li');
+        const typeTag = `<span class="source-tag">${s.doc_type}</span>`;
+        const scoreTag = s.rerank_score != null
+          ? `<span class="source-tag">score: ${s.rerank_score.toFixed(2)}</span>`
+          : '';
+        li.innerHTML = `[${s.idx}] ${typeTag} ${s.disease || '—'} &nbsp;|&nbsp; ${s.file_name} ${scoreTag}`;
+        ul.appendChild(li);
+      });
+      details.appendChild(ul);
+      wrap.appendChild(details);
+    }
+
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+    return wrap;
+  }
+
+  function appendThinking() {
+    const wrap = document.createElement('div');
+    wrap.className = 'bubble-wrap bot';
+    wrap.id = 'thinking';
+    wrap.innerHTML = `<div class="thinking"><span></span><span></span><span></span></div>`;
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+    return wrap;
+  }
+
+  async function sendQuestion() {
+    const question = textarea.value.trim();
+    if (!question) return;
+
+    removeWelcome();
+    sendBtn.disabled = true;
+    textarea.value = '';
+    textarea.style.height = 'auto';
+
+    appendBubble('user', question);
+    const thinking = appendThinking();
+
+    try {
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      });
+
+      thinking.remove();
+
+      if (!res.ok) {
+        const err = await res.json();
+        appendBubble('bot', `Error: ${err.detail || 'Something went wrong.'}`, [], false);
+        return;
+      }
+
+      const data = await res.json();
+      appendBubble('bot', data.answer, data.sources, data.refused);
+
+    } catch (err) {
+      thinking.remove();
+      appendBubble('bot', 'Could not reach the server. Is it running?', [], false);
+    } finally {
+      sendBtn.disabled = false;
+      textarea.focus();
+    }
+  }
+</script>
+
+</body>
+</html>
