@@ -1,8 +1,9 @@
-# Environment variables — never commit real API keys
+# Environment variables
 .env
 
-# Dataset — too large and not yours to redistribute
+# Dataset
 data/raw/mimic-iv-ext-direct-1.0.0/
+source: https://doi.org/10.13026/yf96-kc87
 
 # Generated indexes — can be rebuilt with ingest.py and bm25_retriever.py
 data/chroma_db/

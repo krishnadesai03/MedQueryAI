@@ -10,6 +10,10 @@ That is what this project builds: a **Healthcare Question-Answering System** pow
 
 The key feature: **every claim is backed by a source**. The system is designed to never guess. If it doesn't know, it says so.
 
+Dataset used:
+
+Wang, Bowen, Chang, Jiuyang, and Yiming Qian. "MIMIC-IV-Ext-DiReCT" (version 1.0.0). PhysioNet (2025). RRID:SCR_007345. https://doi.org/10.13026/yf96-kc87
+
 ---
 
 ## The Big Picture — Full Pipeline
