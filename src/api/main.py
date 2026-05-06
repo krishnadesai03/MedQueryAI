@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
+import anthropic
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -95,8 +96,13 @@ def ask(request: AskRequest):
     if not question:
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
-    result = retriever.retrieve_with_context(question)
-    response = generator.answer(question, result["documents"])
+    try:
+        result = retriever.retrieve_with_context(question)
+        response = generator.answer(question, result["documents"])
+    except anthropic.OverloadedError:
+        raise HTTPException(status_code=503, detail="The AI service is temporarily overloaded. Please try again in a moment.")
+    except anthropic.APIStatusError as e:
+        raise HTTPException(status_code=502, detail=f"AI service error: {e.message}")
 
     return AskResponse(
         question=response.question,

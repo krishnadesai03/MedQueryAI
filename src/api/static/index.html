@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MedQueryAI</title>
+  <title>MedQueryAI
+  </title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -78,9 +79,39 @@
       font-size: 0.92rem;
       color: #1a2e47;
       line-height: 1.7;
-      white-space: pre-line;
     }
     .answer-text.refused-text { color: #c53030; }
+
+    .ans-h1, .ans-h2, .ans-h3 {
+      font-weight: 700;
+      color: #042C53;
+      margin: 14px 0 5px;
+      line-height: 1.3;
+    }
+    .ans-h1 { font-size: 1rem; }
+    .ans-h2 { font-size: 0.95rem; }
+    .ans-h3 { font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.04em; color: #378ADD; }
+
+    .ans-ul, .ans-ol {
+      padding-left: 20px;
+      margin: 4px 0 8px;
+    }
+    .ans-ul { list-style-type: disc; }
+    .ans-ol { list-style-type: decimal; }
+    .ans-ul li, .ans-ol li {
+      font-size: 0.92rem;
+      color: #1a2e47;
+      line-height: 1.65;
+      margin-bottom: 3px;
+    }
+
+    .ans-p {
+      font-size: 0.92rem;
+      color: #1a2e47;
+      line-height: 1.7;
+      margin: 0 0 8px;
+    }
+    .ans-p:last-child { margin-bottom: 0; }
 
     /* ── Inline citation circles ── */
     .cite {
@@ -204,14 +235,23 @@
     .example-queries button:hover { background: #dbeafe; }
 
     /* ── Input bar ── */
-    #input-bar {
+    #input-footer {
       background: #fff;
       border-top: 1px solid #dde8f5;
-      padding: 14px 24px;
+      flex-shrink: 0;
+    }
+    #input-bar {
+      padding: 14px 24px 8px;
       display: flex;
       gap: 10px;
       align-items: flex-end;
-      flex-shrink: 0;
+    }
+    #input-note {
+      text-align: center;
+      font-size: 0.73rem;
+      font-style: italic;
+      color: #85B7EB;
+      padding: 0 24px 10px;
     }
     #question {
       flex: 1;
@@ -276,9 +316,12 @@
   </div>
 </div>
 
-<div id="input-bar">
-  <textarea id="question" placeholder="Type your clinical question..." rows="1"></textarea>
-  <button id="send-btn" onclick="sendQuestion()">Ask →</button>
+<div id="input-footer">
+  <div id="input-bar">
+    <textarea id="question" placeholder="Type your clinical question..." rows="1"></textarea>
+    <button id="send-btn" onclick="sendQuestion()">Ask →</button>
+  </div>
+  <p id="input-note">Note: This is for informational use only. Consult a qualified clinician for medical decisions.</p>
 </div>
 
 <script>
@@ -313,10 +356,61 @@
       .replace(/>/g, '&gt;');
   }
 
+  function formatInline(text) {
+    return escapeHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/\s*\[\d+\]/g, '');
+  }
+
+  function stripSources(text) {
+    // Remove Sources section heading and everything after it
+    text = text.replace(/\n?(?:#{1,3}\s*)?sources[\s\S]*/i, '');
+    // Remove > Note: disclaimer lines
+    text = text.replace(/\n?>\s*note:[^\n]*/gi, '');
+    // Remove markdown horizontal rules
+    text = text.replace(/\n?---+\n?/g, '\n');
+    return text.trim();
+  }
+
   function formatAnswer(text) {
-    return escapeHtml(text).replace(/\[(\d+)\]/g, (_, n) =>
-      `<span class="cite">${n}</span>`
-    );
+    text = stripSources(text);
+    const lines = text.split('\n');
+    const parts = [];
+    let inUl = false, inOl = false;
+
+    const closeUl = () => { if (inUl) { parts.push('</ul>'); inUl = false; } };
+    const closeOl = () => { if (inOl) { parts.push('</ol>'); inOl = false; } };
+
+    for (const line of lines) {
+      const h3m = line.match(/^###\s+(.*)/);
+      const h2m = line.match(/^##\s+(.*)/);
+      const h1m = line.match(/^#\s+(.*)/);
+      const ulm = line.match(/^[-*]\s+(.*)/);
+      const olm = line.match(/^\d+\.\s+(.*)/);
+
+      if (h3m || h2m || h1m) {
+        closeUl(); closeOl();
+        const content = formatInline((h3m || h2m || h1m)[1]);
+        const cls = h3m ? 'ans-h3' : h2m ? 'ans-h2' : 'ans-h1';
+        parts.push(`<div class="${cls}">${content}</div>`);
+      } else if (ulm) {
+        closeOl();
+        if (!inUl) { parts.push('<ul class="ans-ul">'); inUl = true; }
+        parts.push(`<li>${formatInline(ulm[1])}</li>`);
+      } else if (olm) {
+        closeUl();
+        if (!inOl) { parts.push('<ol class="ans-ol">'); inOl = true; }
+        parts.push(`<li>${formatInline(olm[1])}</li>`);
+      } else if (line.trim() === '') {
+        closeUl(); closeOl();
+      } else {
+        closeUl(); closeOl();
+        parts.push(`<p class="ans-p">${formatInline(line)}</p>`);
+      }
+    }
+    closeUl(); closeOl();
+    return parts.join('');
   }
 
   function groundingLabel(sources) {

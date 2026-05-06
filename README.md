@@ -16,34 +16,7 @@ Wang, Bowen, Chang, Jiuyang, and Yiming Qian. "MIMIC-IV-Ext-DiReCT" (version 1.0
 
 ## The Big Picture — Full Pipeline
 
-```
-                        HEALTHCARE RAG PIPELINE
-  ================================================================
-
-  [RAW DATA]                  [INDEXING]               [ANSWERING]
-  ----------                  ----------               -----------
-
-  Clinical Notes  ──┐
-  Knowledge Graphs ─┤──► Chunk & Clean ──► Embed ──► ChromaDB (Vector Store)
-  Guidelines PDFs ──┘                        │              │
-                                             │              │
-                                             └──► BM25 Index│
-                                                            │
-                              User asks a question ─────────┤
-                                                            │
-                                              BM25 Search ──┤
-                                          Semantic Search ──┼──► Merge & Deduplicate
-                                                            │
-                                                    Cross-Encoder Reranker
-                                                            │
-                                                    Top-K Results
-                                                            │
-                                            Claude (Anthropic API)
-                                                            │
-                                               Answer + [Source References]
-                                                            │
-                                                    Chat UI (Browser)
-```
+![Architecture Diagram](docs/Architectural%20Diagram.png)
 
 ---
 

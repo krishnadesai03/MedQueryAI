@@ -37,7 +37,7 @@ Rules you must follow without exception:
 2. Cite every claim inline using the passage number in square brackets, e.g. [1] or [2].
 3. If the passages do not contain enough information to answer the question,
    respond exactly with:
-   "I don't have enough information in the provided sources to answer this question."
+   "This question falls outside the scope of the available clinical knowledge base. Please ask a healthcare-related question."
 4. Never speculate, invent facts, or use knowledge outside the provided passages.
 5. End your answer with a "Sources" section listing each cited passage.
 6. This system is for informational purposes only. Always include the disclaimer:
@@ -138,7 +138,7 @@ class RAGGenerator:
         if not documents:
             return RAGResponse(
                 question=question,
-                answer="I don't have enough information in the provided sources to answer this question.",
+                answer="This question falls outside the scope of the available clinical knowledge base. Please ask a healthcare-related question.",
                 refused=True,
             )
 
@@ -159,7 +159,7 @@ class RAGGenerator:
         )
 
         answer_text = response.content[0].text.strip()
-        refused = "i don't have enough information" in answer_text.lower()
+        refused = "falls outside the scope" in answer_text.lower() or "i don't have enough information" in answer_text.lower()
 
         return RAGResponse(
             question=question,
