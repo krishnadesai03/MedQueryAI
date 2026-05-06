@@ -75,7 +75,12 @@ class AskResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 @app.get("/", include_in_schema=False)
-def serve_ui():
+def serve_landing():
+    return FileResponse(str(STATIC_DIR / "landing.html"))
+
+
+@app.get("/chat", include_in_schema=False)
+def serve_chat():
     return FileResponse(str(STATIC_DIR / "index.html"))
 
 

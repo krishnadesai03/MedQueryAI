@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Healthcare RAG Assistant</title>
+  <title>MedQueryAI</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f0f4f8;
-      color: #1a202c;
+      background: #EEF4FB;
+      color: #042C53;
       height: 100vh;
       display: flex;
       flex-direction: column;
@@ -18,110 +18,160 @@
 
     /* ── Header ── */
     header {
-      background: #1a365d;
-      color: #fff;
-      padding: 14px 24px;
+      background: #EEF4FB;
+      padding: 16px 28px;
       display: flex;
       align-items: center;
       gap: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      border-bottom: 1px solid rgba(4, 44, 83, 0.1);
       flex-shrink: 0;
     }
-    header svg { flex-shrink: 0; }
-    header h1 { font-size: 1.15rem; font-weight: 600; letter-spacing: 0.01em; }
-    header p  { font-size: 0.78rem; color: #90cdf4; margin-top: 2px; }
+    header h1 { font-size: 1rem; font-weight: 600; color: #042C53; }
 
     /* ── Chat area ── */
     #chat {
       flex: 1;
       overflow-y: auto;
-      padding: 24px 16px;
+      padding: 28px 24px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
-
-    .bubble-wrap {
-      display: flex;
-      flex-direction: column;
-      max-width: 780px;
+    #chat-inner {
+      max-width: 760px;
       width: 100%;
-    }
-    .bubble-wrap.user  { align-self: flex-end; align-items: flex-end; }
-    .bubble-wrap.bot   { align-self: flex-start; align-items: flex-start; }
-
-    .bubble {
-      padding: 12px 16px;
-      border-radius: 16px;
-      line-height: 1.6;
-      font-size: 0.92rem;
-      max-width: 100%;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .bubble-wrap.user .bubble {
-      background: #2b6cb0;
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-    .bubble-wrap.bot .bubble {
-      background: #fff;
-      color: #2d3748;
-      border: 1px solid #e2e8f0;
-      border-bottom-left-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-    }
-    .bubble-wrap.bot .bubble.refused {
-      border-left: 4px solid #e53e3e;
-      background: #fff5f5;
-    }
-
-    /* ── Sources panel ── */
-    .sources {
-      margin-top: 8px;
-      font-size: 0.78rem;
-      color: #4a5568;
-    }
-    .sources summary {
-      cursor: pointer;
-      color: #2b6cb0;
-      font-weight: 500;
-      user-select: none;
-    }
-    .sources summary:hover { text-decoration: underline; }
-    .sources ul {
-      margin-top: 6px;
-      padding-left: 16px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 24px;
     }
-    .sources li { list-style: disc; }
+
+    /* ── User message ── */
+    .msg-user .label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      color: #378ADD;
+      margin-bottom: 5px;
+    }
+    .msg-user .text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #042C53;
+      line-height: 1.4;
+    }
+
+    /* ── Bot card ── */
+    .msg-bot {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 20px 0 20px;
+      display: flex;
+      gap: 16px;
+      box-shadow: 0 1px 4px rgba(4, 44, 83, 0.07);
+    }
+    .msg-bot.refused { border-left: 3px solid #e53e3e; }
+    .msg-bot .icon { flex-shrink: 0; padding-top: 2px; }
+    .msg-bot .body { flex: 1; min-width: 0; padding-bottom: 16px; }
+
+    .answer-text {
+      font-size: 0.92rem;
+      color: #1a2e47;
+      line-height: 1.7;
+      white-space: pre-line;
+    }
+    .answer-text.refused-text { color: #c53030; }
+
+    /* ── Inline citation circles ── */
+    .cite {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 17px;
+      height: 17px;
+      background: #042C53;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.62rem;
+      font-weight: 700;
+      vertical-align: middle;
+      margin: 0 1px;
+      line-height: 1;
+    }
+
+    /* ── Footer row ── */
+    .msg-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+      border-top: 1px solid #e8f0f8;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .sources-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #042C53;
+      cursor: pointer;
+    }
+    .sources-btn:hover { text-decoration: underline; }
+
+    .dot-sep { color: #85B7EB; font-size: 0.85rem; }
+
+    .grounding {
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .grounding.strong   { color: #2e7d32; }
+    .grounding.moderate { color: #e65100; }
+    .grounding.weak     { color: #c62828; }
+
+    /* ── Sources list ── */
+    .sources-list {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      margin: 0 0 16px 0;
+      padding: 12px;
+      background: #f5f9ff;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      color: #0C447C;
+    }
+    .sources-list.open { display: flex; }
+    .sources-list li {
+      list-style: none;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
     .source-tag {
-      display: inline-block;
-      background: #ebf8ff;
-      color: #2c5282;
-      border: 1px solid #bee3f8;
+      background: #dbeafe;
+      color: #1e40af;
       border-radius: 4px;
       padding: 1px 6px;
-      font-size: 0.72rem;
-      margin-right: 4px;
+      font-size: 0.7rem;
+      white-space: nowrap;
     }
 
-    /* ── Thinking indicator ── */
+    /* ── Thinking dots ── */
     .thinking {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 1px 4px rgba(4, 44, 83, 0.07);
       display: flex;
       gap: 5px;
-      padding: 12px 16px;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      border-bottom-left-radius: 4px;
       width: fit-content;
     }
     .thinking span {
-      width: 8px; height: 8px;
-      background: #a0aec0;
+      width: 7px; height: 7px;
+      background: #85B7EB;
       border-radius: 50%;
       animation: bounce 1.2s infinite ease-in-out;
     }
@@ -129,26 +179,35 @@
     .thinking span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes bounce {
       0%, 80%, 100% { transform: translateY(0); }
-      40%           { transform: translateY(-6px); }
+      40%            { transform: translateY(-5px); }
     }
 
-    /* ── Disclaimer ── */
-    .disclaimer {
-      font-size: 0.72rem;
-      color: #718096;
-      background: #fffbeb;
-      border: 1px solid #f6e05e;
-      border-radius: 6px;
-      padding: 6px 10px;
-      margin-top: 6px;
-      max-width: 780px;
+    /* ── Welcome ── */
+    #welcome {
+      text-align: center;
+      margin: auto;
+      padding: 40px 20px;
     }
+    #welcome h2 { font-size: 1.1rem; font-weight: 600; color: #042C53; margin-bottom: 8px; }
+    #welcome p  { font-size: 0.88rem; color: #378ADD; max-width: 420px; margin: 0 auto 20px; }
+    .example-queries { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .example-queries button {
+      background: #fff;
+      border: 1px solid #bee3f8;
+      border-radius: 20px;
+      padding: 7px 16px;
+      font-size: 0.8rem;
+      color: #0C447C;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .example-queries button:hover { background: #dbeafe; }
 
     /* ── Input bar ── */
     #input-bar {
       background: #fff;
-      border-top: 1px solid #e2e8f0;
-      padding: 14px 16px;
+      border-top: 1px solid #dde8f5;
+      padding: 14px 24px;
       display: flex;
       gap: 10px;
       align-items: flex-end;
@@ -157,7 +216,7 @@
     #question {
       flex: 1;
       resize: none;
-      border: 1px solid #cbd5e0;
+      border: 1.5px solid #c3d9f0;
       border-radius: 10px;
       padding: 10px 14px;
       font-size: 0.92rem;
@@ -166,16 +225,19 @@
       max-height: 140px;
       outline: none;
       font-family: inherit;
+      color: #042C53;
+      background: #f7fafd;
       transition: border-color 0.15s;
     }
-    #question:focus { border-color: #2b6cb0; }
+    #question::placeholder { color: #85B7EB; }
+    #question:focus { border-color: #378ADD; background: #fff; }
 
     #send-btn {
-      background: #2b6cb0;
-      color: #fff;
+      background: #042C53;
+      color: #EEF4FB;
       border: none;
       border-radius: 10px;
-      padding: 10px 18px;
+      padding: 10px 20px;
       font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
@@ -183,86 +245,54 @@
       transition: background 0.15s;
       white-space: nowrap;
     }
-    #send-btn:hover:not(:disabled) { background: #2c5282; }
-    #send-btn:disabled { background: #a0aec0; cursor: not-allowed; }
-
-    /* ── Welcome message ── */
-    #welcome {
-      text-align: center;
-      color: #718096;
-      margin: auto;
-      padding: 40px 20px;
-    }
-    #welcome h2 { font-size: 1.1rem; color: #4a5568; margin-bottom: 8px; }
-    #welcome p  { font-size: 0.85rem; max-width: 480px; margin: 0 auto; }
-    .example-queries {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .example-queries button {
-      background: #fff;
-      border: 1px solid #cbd5e0;
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 0.8rem;
-      color: #2b6cb0;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .example-queries button:hover { background: #ebf8ff; }
+    #send-btn:hover:not(:disabled) { background: #0C447C; }
+    #send-btn:disabled { background: #85B7EB; cursor: not-allowed; }
   </style>
 </head>
 <body>
 
 <header>
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-    <rect width="32" height="32" rx="8" fill="#2b6cb0"/>
-    <path d="M16 7v18M7 16h18" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <svg width="28" height="28" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="40" height="40" rx="10" fill="#042C53" />
+    <path d="M11 14 Q11 10 15 10 L29 10 Q33 10 33 14 L33 24 Q33 28 29 28 L20 28 L15 33 L15 28 Q11 28 11 24 Z" fill="#EEF4FB" />
+    <line x1="22" y1="14" x2="22" y2="24" stroke="#042C53" stroke-width="2.4" stroke-linecap="round" />
+    <line x1="17" y1="19" x2="27" y2="19" stroke="#042C53" stroke-width="2.4" stroke-linecap="round" />
   </svg>
-  <div>
-    <h1>Healthcare RAG Assistant</h1>
-    <p>Answers grounded in MIMIC-IV clinical data &amp; diagnostic knowledge graphs</p>
-  </div>
+  <h1>MedQueryAI</h1>
 </header>
 
 <div id="chat">
-  <div id="welcome">
-    <h2>Ask a clinical question</h2>
-    <p>Every answer is grounded in real de-identified clinical notes and diagnostic knowledge graphs. Sources are always cited.</p>
-    <div class="example-queries">
-      <button onclick="fillQuestion(this)">What symptoms are associated with COPD exacerbation?</button>
-      <button onclick="fillQuestion(this)">How is heart failure with preserved ejection fraction diagnosed?</button>
-      <button onclick="fillQuestion(this)">What are the risk factors for acute coronary syndrome?</button>
-      <button onclick="fillQuestion(this)">What lab findings suggest pneumonia?</button>
+  <div id="chat-inner">
+    <div id="welcome">
+      <h2>Ask a clinical question</h2>
+      <p>Every answer is grounded in real de-identified clinical notes and diagnostic knowledge graphs.</p>
+      <div class="example-queries">
+        <button onclick="fillQuestion(this)">What symptoms are associated with COPD exacerbation?</button>
+        <button onclick="fillQuestion(this)">How is heart failure with preserved ejection fraction diagnosed?</button>
+        <button onclick="fillQuestion(this)">What are the risk factors for acute coronary syndrome?</button>
+        <button onclick="fillQuestion(this)">What lab findings suggest pneumonia?</button>
+      </div>
     </div>
   </div>
 </div>
 
 <div id="input-bar">
-  <textarea id="question" placeholder="Type your clinical question here..." rows="1"></textarea>
-  <button id="send-btn" onclick="sendQuestion()">Ask</button>
+  <textarea id="question" placeholder="Type your clinical question..." rows="1"></textarea>
+  <button id="send-btn" onclick="sendQuestion()">Ask →</button>
 </div>
 
 <script>
-  const chat     = document.getElementById('chat');
-  const textarea = document.getElementById('question');
-  const sendBtn  = document.getElementById('send-btn');
+  const chatInner = document.getElementById('chat-inner');
+  const textarea  = document.getElementById('question');
+  const sendBtn   = document.getElementById('send-btn');
 
-  // Auto-resize textarea
   textarea.addEventListener('input', () => {
     textarea.style.height = 'auto';
     textarea.style.height = Math.min(textarea.scrollHeight, 140) + 'px';
   });
 
-  // Submit on Enter (Shift+Enter for newline)
   textarea.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendQuestion();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuestion(); }
   });
 
   function fillQuestion(btn) {
@@ -276,49 +306,116 @@
     if (w) w.remove();
   }
 
-  function appendBubble(role, content, sources, refused) {
-    const wrap = document.createElement('div');
-    wrap.className = `bubble-wrap ${role}`;
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
 
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble' + (refused ? ' refused' : '');
-    bubble.textContent = content;
-    wrap.appendChild(bubble);
+  function formatAnswer(text) {
+    return escapeHtml(text).replace(/\[(\d+)\]/g, (_, n) =>
+      `<span class="cite">${n}</span>`
+    );
+  }
 
-    if (role === 'bot' && sources && sources.length > 0) {
-      const details = document.createElement('details');
-      details.className = 'sources';
-      const summary = document.createElement('summary');
-      summary.textContent = `${sources.length} source${sources.length > 1 ? 's' : ''} cited`;
-      details.appendChild(summary);
+  function groundingLabel(sources) {
+    if (!sources || sources.length === 0) return null;
+    if (sources.length >= 2) return { label: 'Strong grounding', cls: 'strong' };
+    return { label: 'Moderate grounding', cls: 'moderate' };
+  }
 
-      const ul = document.createElement('ul');
+  const BOT_ICON = `<svg width="28" height="28" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="40" height="40" rx="10" fill="#042C53" />
+    <path d="M11 14 Q11 10 15 10 L29 10 Q33 10 33 14 L33 24 Q33 28 29 28 L20 28 L15 33 L15 28 Q11 28 11 24 Z" fill="#EEF4FB" />
+    <line x1="22" y1="14" x2="22" y2="24" stroke="#042C53" stroke-width="2.4" stroke-linecap="round" />
+    <line x1="17" y1="19" x2="27" y2="19" stroke="#042C53" stroke-width="2.4" stroke-linecap="round" />
+  </svg>`;
+
+  function appendUserMsg(question) {
+    const div = document.createElement('div');
+    div.className = 'msg-user';
+    div.innerHTML = `<div class="label">YOU</div><div class="text">${escapeHtml(question)}</div>`;
+    chatInner.appendChild(div);
+    scrollBottom();
+  }
+
+  function appendBotMsg(answer, sources, refused) {
+    const card = document.createElement('div');
+    card.className = 'msg-bot' + (refused ? ' refused' : '');
+
+    const icon = document.createElement('div');
+    icon.className = 'icon';
+    icon.innerHTML = BOT_ICON;
+
+    const body = document.createElement('div');
+    body.className = 'body';
+
+    const answerEl = document.createElement('div');
+    answerEl.className = 'answer-text' + (refused ? ' refused-text' : '');
+    answerEl.innerHTML = formatAnswer(answer);
+    body.appendChild(answerEl);
+
+    if (!refused && sources && sources.length > 0) {
+      const footer = document.createElement('div');
+      footer.className = 'msg-footer';
+
+      const srcBtn = document.createElement('button');
+      srcBtn.className = 'sources-btn';
+      srcBtn.textContent = `${sources.length} source${sources.length > 1 ? 's' : ''}`;
+
+      const sourcesList = document.createElement('div');
+      sourcesList.className = 'sources-list';
       sources.forEach(s => {
         const li = document.createElement('li');
-        const typeTag = `<span class="source-tag">${s.doc_type}</span>`;
-        const scoreTag = s.rerank_score != null
-          ? `<span class="source-tag">score: ${s.rerank_score.toFixed(2)}</span>`
-          : '';
-        li.innerHTML = `[${s.idx}] ${typeTag} ${s.disease || '—'} &nbsp;|&nbsp; ${s.file_name} ${scoreTag}`;
-        ul.appendChild(li);
+        li.innerHTML = `<span class="cite">${s.idx}</span>
+          <span class="source-tag">${s.doc_type}</span>
+          <span>${s.disease || '—'} &nbsp;·&nbsp; ${s.file_name}</span>`;
+        sourcesList.appendChild(li);
       });
-      details.appendChild(ul);
-      wrap.appendChild(details);
+
+      srcBtn.addEventListener('click', () => {
+        const open = sourcesList.classList.toggle('open');
+        srcBtn.textContent = open
+          ? 'Hide sources'
+          : `${sources.length} source${sources.length > 1 ? 's' : ''}`;
+      });
+
+      const g = groundingLabel(sources);
+      footer.appendChild(srcBtn);
+      if (g) {
+        const dot = document.createElement('span');
+        dot.className = 'dot-sep';
+        dot.textContent = '·';
+        const gl = document.createElement('span');
+        gl.className = `grounding ${g.cls}`;
+        gl.textContent = g.label;
+        footer.appendChild(dot);
+        footer.appendChild(gl);
+      }
+
+      body.appendChild(footer);
+      body.appendChild(sourcesList);
     }
 
-    chat.appendChild(wrap);
-    chat.scrollTop = chat.scrollHeight;
-    return wrap;
+    card.appendChild(icon);
+    card.appendChild(body);
+    chatInner.appendChild(card);
+    scrollBottom();
   }
 
   function appendThinking() {
     const wrap = document.createElement('div');
-    wrap.className = 'bubble-wrap bot';
     wrap.id = 'thinking';
     wrap.innerHTML = `<div class="thinking"><span></span><span></span><span></span></div>`;
-    chat.appendChild(wrap);
-    chat.scrollTop = chat.scrollHeight;
+    chatInner.appendChild(wrap);
+    scrollBottom();
     return wrap;
+  }
+
+  function scrollBottom() {
+    const chat = document.getElementById('chat');
+    chat.scrollTop = chat.scrollHeight;
   }
 
   async function sendQuestion() {
@@ -330,7 +427,7 @@
     textarea.value = '';
     textarea.style.height = 'auto';
 
-    appendBubble('user', question);
+    appendUserMsg(question);
     const thinking = appendThinking();
 
     try {
@@ -344,16 +441,16 @@
 
       if (!res.ok) {
         const err = await res.json();
-        appendBubble('bot', `Error: ${err.detail || 'Something went wrong.'}`, [], false);
+        appendBotMsg(`Error: ${err.detail || 'Something went wrong.'}`, [], false);
         return;
       }
 
       const data = await res.json();
-      appendBubble('bot', data.answer, data.sources, data.refused);
+      appendBotMsg(data.answer, data.sources, data.refused);
 
     } catch (err) {
       thinking.remove();
-      appendBubble('bot', 'Could not reach the server. Is it running?', [], false);
+      appendBotMsg('Could not reach the server. Is it running?', [], false);
     } finally {
       sendBtn.disabled = false;
       textarea.focus();

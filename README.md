@@ -1,7 +1,5 @@
 # MedQueryAI: Retrieval-Augmented Clinical Assistant
 
----
-
 ## What Is This Project?
 
 Imagine a doctor who needs a quick, reliable answer to a complex medical question — like "What is the first-line treatment for heart failure with preserved ejection fraction?" Instead of spending 20 minutes searching through textbooks and guidelines, they type the question and get a cited, accurate answer in seconds.
